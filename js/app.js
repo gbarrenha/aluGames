@@ -4,6 +4,11 @@ let jogos = [
   { id: 3, nome: `Takenoko`, imagem: `takenoko.png`, alugado: false },
 ];
 
+let jogosSalvos = localStorage.getItem(`jogos`);
+if (jogosSalvos) {
+  jogos = JSON.parse(jogosSalvos);
+}
+
 function renderizarJogos() {
   let lista = document.getElementById(`lista-jogos`);
   lista.innerHTML = ``;
@@ -15,9 +20,10 @@ function renderizarJogos() {
         <img src="img/${jogo.imagem}" alt="${jogo.nome}">
         </div>
         <p class="dashboard__item__name">${jogo.nome}</p>
-        <a href="#" class="dashboard__item__button ${jogo.alugado ? `dashboard__item__button--return` : ``}" onclick="alterarStatus(${jogo.id})">
+        <button class="dashboard__item__button ${jogo.alugado ? "dashboard__item__button--return" : ""}" 
+        onclick="alterarStatus(${jogo.id})">
           ${jogo.alugado ? `Devolver` : `Alugar`}
-        </a>
+        </button>
       </li>
       `;
   });
@@ -26,20 +32,14 @@ function renderizarJogos() {
 renderizarJogos();
 
 function alterarStatus(id) {
-  let gameClicado = document.getElementById(`game-${id}`);
-  let imagem = gameClicado.querySelector(`.dashboard__item__img`);
-  let botao = gameClicado.querySelector(`.dashboard__item__button`);
-  let nomeJogo = gameClicado.querySelector(`.dashboard__item__name`);
+  let jogo = jogos.find((jogo) => jogo.id === id);
+  if (!jogo) return;
 
-  if (imagem.classList.contains(`dashboard__item__img--rented`)) {
-    if (confirm(`Você tem certeza que deseja devolver o jogo ${nomeJogo.textContent}?`)) {
-      imagem.classList.remove(`dashboard__item__img--rented`);
-      botao.classList.remove(`dashboard__item__button--return`);
-      botao.textContent = `Alugar`;
-    }
-  } else {
-    imagem.classList.add(`dashboard__item__img--rented`);
-    botao.classList.add(`dashboard__item__button--return`);
-    botao.textContent = `Devolver`;
+  if (jogo.alugado) {
+    if (!confirm(`Tem certeza que deseja ${jogo.alugado ? `devolver` : `alugar`} o jogo "${jogo.nome}"?`)) return;
   }
+
+  jogo.alugado = !jogo.alugado;
+  localStorage.setItem(`jogos`, JSON.stringify(jogos));
+  renderizarJogos();
 }
